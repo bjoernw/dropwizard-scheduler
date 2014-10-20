@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+
+        Add Jobs/Tasks for Economic Series Data Load here
+
+    -->
+
+    <bean name="job_economicseries_monthly_load_allSeries" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <bean id="task_economicseries_loadData" class="org.bw.scheduler.tasks.economicseries.impl.EconomicSeriesDataLoadTask">
+                <constructor-arg>
+                    <bean id="dto_economicseries_monthly_allSeries" class="org.bw.scheduler.tasks.economicseries.dto.EconomicDataLoadDTO">
+                        <constructor-arg index="0" value="01/01/2011"/>
+                        <constructor-arg index="1" value="FRED"/>
+                        <constructor-arg index="2" value="sample-series"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="targetMethod" value="load"/>
+    </bean>
+
+    <bean id="trigger_economicseries_monthly_load_allSeries"
+          class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="job_economicseries_monthly_load_allSeries"/>
+        <property name="repeatInterval" value="50000"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
+
+    <bean id="defaultScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <!--<property name="jobDetails">-->
+            <!--<list>-->
+                <!--<ref bean="job_economicseries_monthly_load_allSeries"/>-->
+            <!--</list>-->
+        <!--</property>-->
+        <property name="configLocation" value="classpath:quartz.properties"/>
+        <property name="triggers">
+            <list>
+                <ref bean="trigger_economicseries_monthly_load_allSeries"/>
+            </list>
+        </property>
+
+        <property name="schedulerName" value="defaultScheduler"/>
+
+    </bean>
+
+</beans>
